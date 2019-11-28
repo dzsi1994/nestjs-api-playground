@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { IdeaDTO } from './idea.dto';
 
 @Injectable()
@@ -11,17 +11,28 @@ export class IdeaService {
     return await this.ideas;
   }
   async createIdea(data: IdeaDTO) {
+    data['created'] = Date.now();
     return await data;
   }
   async getIdea(id: string) {
-    return await this.ideas.find(item => item.id === id);
+    const idea = await this.ideas.find(item => item.id === id);
+    if (!idea) {
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    }
+    return idea;
   }
-  async updateIdea(id: string, idea: Partial<IdeaDTO>) {
-    // const ideaToUpdate = this.ideas.find(item => item.id === id)
-    return await this.ideas[0];
+  async updateIdea(id: string, data: Partial<IdeaDTO>) {
+    const idea = await this.ideas.find(item => item.id === id);
+    if (!idea) {
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    }
+    return idea;
   }
   async deleteIdea(id: string) {
-    const ideas = await this.ideas.filter(idea => idea.id !== id);
+    const idea = await this.ideas.find(item => item.id === id);
+    if (!idea) {
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    }
     return { deleted: true };
   }
 }
